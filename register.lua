@@ -1,5 +1,6 @@
 local register = {
   state = nil,
+  handle = {}
 }
 
 function register:load(state)
