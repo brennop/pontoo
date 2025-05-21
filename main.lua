@@ -10,6 +10,8 @@ function love.load()
 
   local font = love.graphics.newFont("font.ttf", 8)
   love.graphics.setFont(font)
+
+  love.mouse.setVisible(false)
 end
 
 function love.keypressed(key)
@@ -25,17 +27,31 @@ function love.textinput(text)
 end
 
 function love.draw()
+  love.graphics.setBlendMode "alpha"
+  love.graphics.setBackgroundColor(0.96, 0.96, 0.96)
+  love.graphics.setColor(0.1, 0.1, 0.1)
+
+  love.graphics.setLineWidth(2)
+  love.graphics.setColor(0.1, 0.1, 0.1)
+  love.graphics.rectangle("line", 8, 8, WIDTH - 16, HEIGHT / 2 - 12)
+
   screen:draw()
 
   love.graphics.push()
   love.graphics.translate(0, HEIGHT / 2)
 
   love.graphics.setLineWidth(2)
+  love.graphics.setColor(0.1, 0.1, 0.1)
   love.graphics.rectangle("line", 8, 4, WIDTH - 16, HEIGHT / 2 - 12)
 
   state:get():draw()
 
   love.graphics.pop()
+
+  local x, y = love.mouse.getPosition() 
+
+  love.graphics.setBlendMode "subtract"
+  love.graphics.circle("fill", x, y, 16)
 end
 
 function love.update(dt)

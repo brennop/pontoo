@@ -22,7 +22,8 @@ function state:login(username, password)
   else
     self:set(register)
 
-    local times = { '09:37', '12:08', '12:48', '16:53' }
+    -- local times = { '09:37', '12:08', '12:48', nil }
+    local times = { '09:37', nil, nil, nil }
 
     self.screen:setTimes(times)
   end
