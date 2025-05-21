@@ -1,10 +1,14 @@
+-- maybe have a global timer??
+local Timer = require "lib.timer"
+
+local initialX = 64
+
 local register = {
   state = nil,
   handle = {
-    x = 400,
-    y = 300,
-    width = 50,
-    height = 50,
+    x = initialX,
+    y = (240 / 2 - 12) / 2,
+    size = 16,
     dragging = false,
     dragOffsetX = 0,
     dragOffsetY = 0
@@ -13,6 +17,7 @@ local register = {
 
 function register:load(state)
   self.state = state
+  self.timer = Timer()
 end
 
 function register:keypressed(key)
@@ -26,26 +31,29 @@ end
 
 function register:update(dt)
   local mx, my = love.mouse.getPosition()
+  my = my - HEIGHT / 2
   
   if love.mouse.isDown(1) then
     if self.handle.dragging then
-      -- Update handle position based on mouse movement
       self.handle.x = mx - self.handle.dragOffsetX
-      self.handle.y = my - self.handle.dragOffsetY
     else
-      -- Check if mouse is over the handle
-      if mx >= self.handle.x and mx <= self.handle.x + self.handle.width and
-         my >= self.handle.y and my <= self.handle.y + self.handle.height then
-        -- Start dragging
+      if mx >= self.handle.x - self.handle.size and mx <= self.handle.x + self.handle.size and
+         my >= self.handle.y - self.handle.size and my <= self.handle.y + self.handle.size then
+
         self.handle.dragging = true
         self.handle.dragOffsetX = mx - self.handle.x
-        self.handle.dragOffsetY = my - self.handle.y
       end
     end
   else
-    -- Release drag when mouse button is released
+    -- if we fall here and still dragging, than this is the last frame of the drag
+    if self.handle.dragging then
+      self.timer:tween(1, self.handle, { x = initialX }, 'out-elastic')
+    end
+
     self.handle.dragging = false
   end
+
+  self.timer:update(dt)
 end
 
 function register:draw()
@@ -56,15 +64,8 @@ function register:draw()
   else
     love.graphics.setColor(0.5, 0.5, 0.8)
   end
-  
-  love.graphics.rectangle("fill", self.handle.x, self.handle.y, 
-                          self.handle.width, self.handle.height)
-  
-  -- Reset color
-  love.graphics.setColor(1, 1, 1)
-  
-  -- Draw handle label
-  love.graphics.print("Drag me", self.handle.x + 5, self.handle.y + 15)
+
+  love.graphics.circle("fill", self.handle.x, self.handle.y, self.handle.size)
 end
 
 return register
