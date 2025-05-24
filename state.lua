@@ -17,13 +17,22 @@ function state:get()
 end
 
 function state:login(username, password)
+  self.client:exec("Wait(inputField)")
+  self.client:exec('String("1")')
+  self.client:exec('Enter()')
+
+  -- TODO: validate non empty
+  self.client:exec("Wait(inputField)")
+  self.client:exec('String("' .. username .. '")')
+  self.client:exec('String("' .. password .. '")')
+  self.client:exec('Enter()')
+
   if username == "abc" then
     self.screen:setError("deu ruim :(")
   else
     self:set(register)
 
-    -- local times = { '09:37', '12:08', '12:48', nil }
-    local times = { '09:37', nil, nil, nil }
+    local times = { nil, nil, nil, nil }
 
     self.screen:setTimes(times)
   end

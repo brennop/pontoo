@@ -1,12 +1,25 @@
 local state = require "state"
 local screen = require "screen"
+local client = require "client"
 
 WIDTH = 320
 HEIGHT = 240
 
+local function cleanup()
+  print "closing"
+  client:close()
+  print "closed"
+end
+
+function love.quit()
+  cleanup()
+end
+
 function love.load()
   state:get():load(state)
   state.screen = screen
+  state.client = client
+  client:load()
 
   local font = love.graphics.newFont("font.ttf", 8)
   love.graphics.setFont(font)
@@ -59,3 +72,4 @@ function love.update(dt)
 
   state:get():update(dt)
 end
+
