@@ -1,7 +1,7 @@
 local COLORS = {
   idle = 0.8,
   hover = 0.4,
-  active = 1.0,
+  active = 0.05,
 }
 
 local register = {
@@ -27,21 +27,28 @@ end
 
 function register:update(dt)
   local lastState = self.button.state
+  local hover = register:isHover()
 
-  if register:isHover() then
-    self.button.state = "hover"
-
-    if love.mouse.isDown(1) then
+  if love.mouse.isDown(1) then
+    if hover then
       self.button.state = "active"
     end
   else
-    self.button.state = "idle"
+    if hover then
+      self.button.state = "hover"
+    else
+      self.button.state = "idle"
+    end
   end
   
   if self.button.state ~= lastState then
     if self.button.handle then timer.cancel(self.button.handle) end
 
     timer.tween(0.3, self.button, { color = COLORS[self.button.state] }, "in-out-cubic")
+
+    if self.button.state == "idle" and lastState == "active" then
+      timer.tween(1.0, self.button, { size = 400 }, "in-out-cubic")
+    end
   end
 end
 
