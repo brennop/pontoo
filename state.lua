@@ -31,11 +31,17 @@ function state:login(username, password)
     self.screen:setError("deu ruim :(")
   else
     self:set(register)
+    self.client:exec("Wait(inputField)")
 
     local times = { nil, nil, nil, nil }
 
     self.screen:setTimes(times)
   end
+end
+
+function state:register()
+  self.client:exec('String("x")')
+  self.client:exec('PF(2)')
 end
 
 return state
