@@ -2,6 +2,8 @@ local state = require "state"
 local screen = require "screen"
 local client = require "client"
 
+timer = require "lib.timer"
+
 WIDTH = 320
 HEIGHT = 240
 
@@ -71,5 +73,7 @@ function love.update(dt)
   screen:update()
 
   state:get():update(dt)
+
+  timer.update(dt)
 end
 

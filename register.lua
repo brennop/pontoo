@@ -1,12 +1,16 @@
-local initialX = 64
+local COLORS = {
+  idle = 0.8,
+  hover = 0.4,
+  active = 1.0,
+}
 
 local register = {
   state = nil,
-  handle = {
+  button = {
     size = 16,
-    dragging = false,
-    dragOffsetX = 0,
-    dragOffsetY = 0
+    state = "idle",
+    color = COLORS.idle,
+    handle = nil
   }
 }
 
@@ -14,74 +18,46 @@ function register:textinput(text) end
 
 function register:load(state)
   self.state = state
-
-  self.world = love.physics.newWorld()
-  self.body = love.physics.newBody(self.world, initialX, (240 / 2 - 12) / 2, "dynamic")
-  self.anchor = love.physics.newBody(self.world, initialX, (240 / 2 - 12) / 2, "static")
-  self.joint = love.physics.newDistanceJoint(self.body, self.anchor, self.body:getX(), self.body:getY(), self.anchor:getX(), self.anchor:getY())
-
-  self.joint:setFrequency(0.8)
-  self.joint:setDampingRatio(1.0)
+  self.button.x = (WIDTH / 2 - 12)
+  self.button.y = (HEIGHT / 2 - 12) / 2
 end
 
 function register:keypressed(key)
-  if key == "escape" then
-    self.handle.dragging = false
-  elseif key == "a" then
-    self.joint:setFrequency(self.joint:getFrequency() + 0.1)
-    print(self.joint:getFrequency())
-  elseif key == "s" then
-    self.joint:setFrequency(self.joint:getFrequency() - 0.1)
-    print(self.joint:getFrequency())
-  elseif key == "z" then
-    self.joint:setDampingRatio(self.joint:getDampingRatio() + 0.1)
-    print(self.joint:getDampingRatio())
-  elseif key == "x" then
-    self.joint:setDampingRatio(self.joint:getDampingRatio() - 0.1)
-    print(self.joint:getDampingRatio())
-  elseif key == "q" then
-    self.body:setLinearDamping(self.body:getLinearDamping() + 0.1)
-    print(self.body:getLinearDamping())
-  elseif key == "w" then
-    self.body:setLinearDamping(self.body:getLinearDamping() - 0.1)
-    print(self.body:getLinearDamping())
-  end
-
 end
 
 function register:update(dt)
-  local mx, my = love.mouse.getPosition()
-  my = my - HEIGHT / 2
-  
-  if love.mouse.isDown(1) then
-    if self.handle.dragging then
-      self.body:applyLinearImpulse(-self.body:getX() + mx - self.handle.dragOffsetX, 0)
-      --self.body:setX(mx - self.handle.dragOffsetX, 0)
-    else
-      if mx >= self.body:getX() - self.handle.size and mx <= self.body:getX() + self.handle.size and
-         my >= self.body:getY() - self.handle.size and my <= self.body:getY() + self.handle.size then
+  local lastState = self.button.state
 
-        self.handle.dragging = true
-        self.handle.dragOffsetX = mx - self.body:getX()
-      end
+  if register:isHover() then
+    self.button.state = "hover"
+
+    if love.mouse.isDown(1) then
+      self.button.state = "active"
     end
   else
-    self.handle.dragging = false
+    self.button.state = "idle"
   end
+  
+  if self.button.state ~= lastState then
+    if self.button.handle then timer.cancel(self.button.handle) end
 
-  self.world:update(dt)
+    timer.tween(0.3, self.button, { color = COLORS[self.button.state] }, "in-out-cubic")
+  end
 end
 
 function register:draw()
-  -- Draw the handle
-  if self.handle.dragging then
-    -- Highlight when dragging
-    love.graphics.setColor(1, 0.8, 0.2)
-  else
-    love.graphics.setColor(0.5, 0.5, 0.8)
-  end
+  love.graphics.setColor(self.button.color, self.button.color, self.button.color)
 
-  love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.handle.size)
+  love.graphics.circle("fill", self.button.x, self.button.y, self.button.size)
+end
+
+function register:isHover()
+  local mx, my = love.mouse.getPosition()
+  -- account for love.graphics.translate
+  my = my - HEIGHT / 2
+
+  return mx >= self.button.x - self.button.size and mx <= self.button.x + self.button.size and
+     my >= self.button.y - self.button.size and my <= self.button.y + self.button.size
 end
 
 return register
